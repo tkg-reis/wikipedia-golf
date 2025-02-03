@@ -5,7 +5,7 @@
   "description": "wikipedia word chain",
   "action" : {
     "default_popup": "index.html",
-    "default_icon": "rogo_RGB.png"
+    "default_icon": "img/rogo_RGB.png"
   },
   "permissions": ["tabs", "storage","notifications","alarms"],
   "background": {
