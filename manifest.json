@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "wikipedia golf",
+  "version": "1.0",
+  "description": "wikipedia word chain",
+  "action" : {
+    "default_popup": "index.html",
+    "default_icon": "rogo_RGB.png"
+  },
+  "permissions": ["tabs", "storage","notifications","alarms"],
+  "background": {
+    "service_worker": "js/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://ja.m.wikipedia.org/wiki/*", "https://ja.wikipedia.org/wiki/*"],
+      "js": ["js/content.js"],
+      "type": "module"
+    }
+  ]
+}
