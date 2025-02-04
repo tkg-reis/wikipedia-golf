@@ -1,5 +1,3 @@
-// TODO: redirectがリンク先設定されている場合、リンクの押下をさせないようにする。
-// TODO: クリック時にhttpリクエストをしてデータを参照してから遷移可能か判別する必要あり。
 // TODO: 英語ページは非活性にする。https://en.wikipedia.org/wiki/Steve_Englehar
 // MEMO: https://ja.wikipedia.org/wiki/%E3%83%B4%E3%82%A3%E3%83%AB%E3%83%98%E3%83%AB%E3%83%A0%E3%83%BB%E3%82%B0%E3%83%AA%E3%83%A0
 // 上記の言語学者参照

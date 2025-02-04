@@ -37,9 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (word_start && word_end && number_of_steps) {
         document.getElementById("word_start").textContent = word_start;
         document.getElementById("word_end").textContent = word_end;
-        document.getElementById("number_of_steps").textContent =
-          number_of_steps;
-        // startTimer(60);
+        document.getElementById("number_of_steps").textContent = number_of_steps;
         document.getElementById("catch").setAttribute("disabled", true);
       } else {
         document.getElementById("views").textContent =

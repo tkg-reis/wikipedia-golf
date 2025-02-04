@@ -7,28 +7,18 @@
 // TODO: 手数以内で終着点にたどり着いたらsuccessを出して、apiを呼べるボタンを活性状態にする。
 // TODO: リンクが設けられていなくてもDOMツリーに存在すればsuccessを出すようにする。
 // TODO: 終着点のデータが半角で文字のスペースがある場合、自動でアンダースコアが挿入されるみたいなので、検索時点でスペースが含まれる文字か検知する関数を作成する必要あり。
-
 // TODO:終着点のデータを相手に決めさせるようにする。
-// TODO:手数分検索が終了した際の画面のキャッシュ制御について
 
 // MEMO: 拡張機能のアイコンからファイルに定義されたプリントデバッグを見ることができる。
 
 // EXPLAIN:カウントの作成、更新の関数
 const targetURL = "https://ja.wikipedia.org/wiki/"; // 監視するURL
 
-// chrome.action.onClicked.addListener((tab) => {
-//   console.log("拡張機能のアイコンがクリックされました:", tab);
-// });
-
-
 const countTabChangeToStorage = () => {
   chrome.storage.local.get("visitCount", (result) => {
     const currentCount = result.visitCount || 0;
     const newCount = currentCount + 1;
-
-    chrome.storage.local.set({ visitCount: newCount }
-      // , () => { console.log(`Visit count updated: ${newCount}`)}
-    );
+    chrome.storage.local.set({ visitCount: newCount });
   });
 };
 
@@ -95,7 +85,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "timer") {
     chrome.notifications.create({
       type: "basic",
-      iconUrl: "../img/rogo_RGB.png",  // アイコン画像を追加
+      iconUrl: "../img/rogo_RGB.png",
       title: "タイマー終了",
       message: "60秒が経過しました！",
       priority: 2
