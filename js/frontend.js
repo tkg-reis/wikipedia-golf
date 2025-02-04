@@ -9,6 +9,8 @@ const timer = () => {
 };
 
 // TODO: apiを読んだ時点でendTimeをどこかで仕込む必要がある。そうしないといつまでもundefind
+// TODO: todoをissueに起こす作業
+
 document.addEventListener("DOMContentLoaded", async () => {
   
   chrome.storage.local.get(["visitCount","wordList","word_start","word_end","number_of_steps","resultValue","returnCheckVal", "endTime"],
@@ -20,7 +22,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const number_of_steps = result.number_of_steps || 0;
       const endtime = result.endTime;
       const remainingTime = endtime ? Math.max(0, Math.floor((endtime - Date.now()) / 1000)) : null;
-      // const resultValue = result.resultValue || "";
       let tempCurrentWord = "";
 
       if (wordList.length > 0) {
@@ -70,23 +71,17 @@ document.addEventListener("DOMContentLoaded", async () => {
               document.getElementById("count").textContent = 0;
               document.getElementById("chainWords").textContent = "";
             }
-          );
+          )
+        }).then(() => {
+          updateResultValue().catch((error) => {
+            console.error("エラー:", error);
+          });
         })
       }
-      // きちんとgetで値を取得や初期化をしていないためか。
-      // getを使用してresultがあるかいなかを判別して、非同期処理を使ってresultのデータ確実に格納されるようにリファクタリングする。
-      // if (result.resultValue) {
-      //   document.getElementById("result_value").textContent =
-      //     result.resultValue + result.returnCheckVal;
-      // } else {
-      //   document.getElementById("result_value").textContent = "データなし";
-      // }
+      
     }
   );
-  // if(chrome.storage.local.get("returnCheckVal", "resultValue")) {
-
-  // }
-
+  
   const updateResultValue = async () => {
     const result = await new Promise((resolve, reject) => {
       chrome.storage.local.get(["resultValue", "returnCheckVal"], (res) => {
@@ -106,11 +101,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           : "データなし";
     }
   };
-  
-  updateResultValue().catch((error) => {
-    console.error("エラー:", error);
-  });
-  
 });
 
 function updateRemainingTime() {
