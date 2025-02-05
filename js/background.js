@@ -65,7 +65,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     saveURLToStorage(url);
     chrome.notifications.create({
       type: "basic",
-      iconUrl: "../img/rogo_RGB.png",
+      iconUrl: "../img/wikipedia-golf.png",
       title: "ページとカウントが更新されました。",
       message: `add ${decodeURI(url).match(/\/([^\/]+)$/)[1]}`
     });
@@ -87,7 +87,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "timer") {
     chrome.notifications.create({
       type: "basic",
-      iconUrl: "../img/rogo_RGB.png",
+      iconUrl: "../img/wikipedia-golf.png",
       title: "タイマー終了",
       message: "60秒が経過しました！",
       priority: 2
