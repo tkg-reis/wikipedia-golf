@@ -199,3 +199,9 @@ document.getElementById("catch").addEventListener("click", async () => {
     console.log("タイトルの取得に失敗しました。");
   }
 });
+
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.action === "close_popup") {
+    window.close();
+  }
+});

@@ -67,16 +67,18 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       type: "basic",
       iconUrl: "../img/rogo_RGB.png",
       title: "ページとカウントが更新されました。",
-      message: `add ${decodeURI(url)}`
+      message: `add ${decodeURI(url).match(/\/([^\/]+)$/)[1]}`
     });
-    chrome.runtime.onMessage.addListener(async(message, sender, sendResponse) => {
-      if (message.action === "open_popup") {
-        try {
-          return await chrome.action.openPopup()
-        } catch (error) {
-          console.error("ポップアップを開けませんでした:", error);
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      (async () => {
+        if (message.action === "open_popup") {
+          try {
+            return await chrome.action.openPopup()
+          } catch (error) {
+            console.error("ポップアップを開けませんでした:", error);
+          }
         }
-      }
+      })();
     });
   }
 });
@@ -90,6 +92,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
       message: "60秒が経過しました！",
       priority: 2
     });
-    chrome.storage.local.remove("startTime");
+    chrome.storage.local.remove("startTime", () => {
+      chrome.runtime.sendMessage({ action: "close_popup" });
+    });
   }
 });
