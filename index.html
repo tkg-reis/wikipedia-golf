@@ -8,11 +8,19 @@
     <title>wikipedia-golf</title>
 </head>
 <body>
-    <p>制限時間: <span id="remaining-time">0</span> 秒</p>
-    <h2>↓Your Current Count</h2>
-    <p id="count"></p>
-    <h2>↓Your limitation Count</h2>
-    <p id="number_of_steps"></p>
+    <div class="flex">    
+        <h1>wikipedia-golf</h1>
+        <div>
+            <img src="./img/wikipedia-golf.png" alt="" class="img">
+        </div>
+    </div>
+    <h2>Your Current Count : 
+        <span id="count"></span>
+    </h2>
+    <h2>Your limitation Count : 
+        <span id="number_of_steps"></span>
+    </h2>
+    <p>time limit: <span id="remaining-time">0</span> sec</p>
     <p id="chainWords"></p>
     <p id="views"></p>
     <p id="word_start"></p>
@@ -29,7 +37,7 @@
             <option value="120">120</option>
         </select>
     </form> -->
-    <button id="catch">get random wikipedia word</button>
+    <button id="catch">start wikipedia-golf</button>
     <script src="js/frontend.js"></script>
 </body>
 </html>
