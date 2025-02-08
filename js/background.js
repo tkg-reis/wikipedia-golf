@@ -88,7 +88,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
       type: "basic",
       iconUrl: "../img/wikipedia-golf.png",
       title: "タイマー終了",
-      message: "60秒が経過しました！",
+      message: "60秒が経過しました！ 拡張機能をクリックして結果を確認しましょう",
       priority: 2
     });
     chrome.storage.local.remove("endTime", () => {

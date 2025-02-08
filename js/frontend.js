@@ -1,10 +1,9 @@
 const timer = () => {
-  const endTime = Date.now() + 60 * 1000; // 現在時刻 + 60秒
+  const endTime = Date.now() + 65 * 1000; // 現在時刻 + 60秒
 
   // 終了時刻を保存
   chrome.storage.local.set({ endTime: endTime }, () => {
     chrome.alarms.create("timer", { delayInMinutes: 1 });
-    alert("60秒の制限タイマーを開始しました！");
   });
 };
 
@@ -26,31 +25,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (wordList.length > 0) {
         for (const word of wordList) {
-          document.getElementById("chainWords").textContent += `${word}\n =>`; // 改行で連結する
+          document.getElementById("chainWords").textContent += `${word} =>`;
           tempCurrentWord = word;
         }
-      } else {
-        document.getElementById("chainWords").textContent =
-          "登録されたURLがありません";
       }
 
       if (word_start && word_end && number_of_steps) {
-        document.getElementById("word_start").textContent = word_start;
-        document.getElementById("word_end").textContent = word_end;
-        document.getElementById("number_of_steps").textContent = number_of_steps;
+        document.getElementById("word_start").textContent = `start word : ${word_start}`;
+        document.getElementById("word_end").textContent = `end word : ${word_end}`;
+        document.getElementById("number_of_steps").textContent = `Your limitation Count : ${number_of_steps}`;
         document.getElementById("catch").setAttribute("disabled", true);
-      } else {
-        document.getElementById("views").textContent =
-          "not starting game";
       }
 
-      document.getElementById("count").textContent = count;
+      document.getElementById("count").textContent = `Your Current Count : ${count}`;
       
       if ((wordList.length > 0 && Number(document.getElementById("count").textContent) >= number_of_steps) ||
         (wordList.length > 0 && tempCurrentWord === word_end) || (remainingTime < 1)) {
         document.getElementById("catch").removeAttribute("disabled");
         chrome.storage.local.set({
-          returnCheckVal : checkValue(word_end, wordList[wordList.length - 1]) || "no data",
+          returnCheckVal : checkValue(word_end, wordList[wordList.length - 1]),
           resultValue : wordList.toString(),
         }).then(() => {
           chrome.storage.local.remove(
@@ -63,10 +56,10 @@ document.addEventListener("DOMContentLoaded", async () => {
               "endTime"
             ],
             () => {
-              document.getElementById("word_start").textContent = "";
-              document.getElementById("word_end").textContent = "";
-              document.getElementById("number_of_steps").textContent = 0;
-              document.getElementById("count").textContent = 0;
+              document.getElementById("word_start").textContent = "Not started game!";
+              document.getElementById("word_end").textContent = "Please push bottom button!";
+              document.getElementById("number_of_steps").textContent = "Not set count";
+              document.getElementById("count").textContent = "Not set count";
               document.getElementById("chainWords").textContent = "";
             }
           )
@@ -94,9 +87,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const resultElement = document.getElementById("result_value");
     if (resultElement) {
       resultElement.textContent =
-        result.resultValue || result.returnCheckVal
+        result.resultValue && result.returnCheckVal
           ? (result.resultValue || "") + (result.returnCheckVal || "")
-          : "データなし";
+          : "No result";
     }
   };
 });
@@ -105,7 +98,7 @@ function updateRemainingTime() {
   chrome.storage.local.get("endTime", (data) => {
     if (data.endTime) {
       const remainingTime = Math.max(0, Math.floor((data.endTime - Date.now()) / 1000));
-      document.getElementById("remaining-time").textContent = remainingTime;
+      document.getElementById("remaining-time").textContent = `time limit : ${remainingTime} sec`;
 
       // 0秒になったらタイマーをリセット
       // 0にするとfalsyな値になるため処理が面倒になるため一時的に下記の処理
@@ -125,10 +118,7 @@ updateRemainingTime();
 function checkValue(endtWord, resultWord) {
   if (endtWord == resultWord) {
     return "\n success";
-  // } else if(endtWord == null && resultWord == null) {
-  //   return "\n no result";
-  } 
-  else {
+  } else {
     return "\n failure";
   }
 }
