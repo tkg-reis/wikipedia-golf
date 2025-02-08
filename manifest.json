@@ -5,7 +5,7 @@
   "description": "wikipedia word chain",
   "action" : {
     "default_popup": "index.html",
-    "default_icon": "img/wikipedia-golf.png"
+    "default_icon": "img/wikipedia-golf_ver2.png"
   },
   "permissions": ["tabs", "storage","notifications","alarms"],
   "background": {
