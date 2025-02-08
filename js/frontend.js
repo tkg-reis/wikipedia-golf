@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("catch").setAttribute("disabled", true);
       } else {
         document.getElementById("views").textContent =
-          "ゲームはスタートしていません";
+          "not starting game";
       }
 
       document.getElementById("count").textContent = count;
@@ -125,7 +125,10 @@ updateRemainingTime();
 function checkValue(endtWord, resultWord) {
   if (endtWord == resultWord) {
     return "\n success";
-  } else {
+  // } else if(endtWord == null && resultWord == null) {
+  //   return "\n no result";
+  } 
+  else {
     return "\n failure";
   }
 }
@@ -155,7 +158,6 @@ async function getRandomWikipediaTitle() {
     const randomTitle = data.query.random;
     return randomTitle;
   } catch (error) {
-    console.error("エラーが発生しました:", error);
     return null;
   }
 }

@@ -24,7 +24,6 @@ const countTabChangeToStorage = () => {
 
 // EXPLAIN:半角スペースがあればアンダースコアに変更する関数
 const replaceSpacesWithUnderscores = (value) => {
-  console.log(value);
   if (typeof value !== "string") {
       throw new Error("Input must be a string");
   }
@@ -92,7 +91,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
       message: "60秒が経過しました！",
       priority: 2
     });
-    chrome.storage.local.remove("startTime", () => {
+    chrome.storage.local.remove("endTime", () => {
       chrome.runtime.sendMessage({ action: "close_popup" });
     });
   }
