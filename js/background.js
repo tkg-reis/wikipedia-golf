@@ -69,16 +69,16 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       message: `add ${decodeURI(url).match(/\/([^\/]+)$/)[1]}`
     });
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      (async () => {
-        if (message.action === "open_popup") {
-          try {
-            return await chrome.action.openPopup()
-          } catch (error) {
-            console.error("ポップアップを開けませんでした:", error);
-          }
-        }
-      })();
-    });
+      if (message.action === "open_popup") {
+        chrome.action.openPopup()
+          .then(() => sendResponse({ success: true }))
+          .catch((error) => {
+            sendResponse({ success: false, error: error.message });
+          });
+          return true;
+      }
+    }
+    );
   }
 });
 
