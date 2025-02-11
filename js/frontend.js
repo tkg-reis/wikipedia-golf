@@ -1,15 +1,13 @@
+// EXPLAIN:制限時間設定関数、関数発火時設定秒数とalarm apiの作成をする。
 const timer = () => {
-  const endTime = Date.now() + 65 * 1000; // 現在時刻 + 60秒
-
+  const endTime = Date.now() + 65 * 1000; // 現在時刻 + X秒
   // 終了時刻を保存
   chrome.storage.local.set({ endTime: endTime }, () => {
     chrome.alarms.create("timer", { delayInMinutes: 1 });
   });
 };
 
-// TODO: apiを読んだ時点でendTimeをどこかで仕込む必要がある。そうしないといつまでもundefind
-// TODO: todoをissueに起こす作業
-
+// EXPLAIN:ポップアップを表示する際に手数や始まり、終わりの言葉、制限時間を管理する。手数か制限時間が切れる、または手数以内で目的の言葉までたどり着けば、これまで遷移したurlのデータを配列でポップアップに表示する。
 document.addEventListener("DOMContentLoaded", async () => {
   
   chrome.storage.local.get(["visitCount","wordList","word_start","word_end","number_of_steps","resultValue","returnCheckVal", "endTime"],
@@ -69,10 +67,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           });
         })
       }
-      
     }
   );
-  
+
+  // EXPLAIN:遷移した時に取得したurlを配列で格納。
   const updateResultValue = async () => {
     const result = await new Promise((resolve, reject) => {
       chrome.storage.local.get(["resultValue", "returnCheckVal"], (res) => {
@@ -83,7 +81,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       });
     });
-  
     const resultElement = document.getElementById("result_value");
     if (resultElement) {
       resultElement.textContent =
@@ -94,14 +91,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 });
 
+// EXPLAIN:制限時間をポップアップに表示するための機能
 function updateRemainingTime() {
   chrome.storage.local.get("endTime", (data) => {
     if (data.endTime) {
       const remainingTime = Math.max(0, Math.floor((data.endTime - Date.now()) / 1000));
       document.getElementById("remaining-time").textContent = `time limit : ${remainingTime} sec`;
-
-      // 0秒になったらタイマーをリセット
-      // 0にするとfalsyな値になるため処理が面倒になるため一時的に下記の処理
+      // MEMO:0にするとfalsyな値になるため処理が面倒になる。
       if (remainingTime < 1) {
         chrome.storage.local.remove("endTime");
       }
@@ -109,12 +105,13 @@ function updateRemainingTime() {
   });
 }
 
-// 1秒ごとに経過時間を更新
+// EXPLAIN:1秒ごとに経過時間を更新
 setInterval(updateRemainingTime, 1000);
 
-// ポップアップを開いたときに経過時間を更新
+// EXPLAIN:ポップアップを開いたときに経過時間を更新
 updateRemainingTime();
 
+// EXPLAIN:終わりの言葉と自分がたどってきたurlの道の終着点のデータを判定してsuccess/failureを出力する関数。
 function checkValue(endtWord, resultWord) {
   if (endtWord == resultWord) {
     return "\n success";
@@ -123,12 +120,12 @@ function checkValue(endtWord, resultWord) {
   }
 }
 
-// MEMO:  ランダムな数を生成する関数
+// EXPLAIN:ランダムな数を生成する関数
 const randomNumberFunc = () => {
   return Math.floor(Math.random() * (9 - 5 + 1)) + 5;
 };
-// MEMO:  wikipedia apiで単語をランダムに2つ取得する関数
-// FIX: 返値の渡し方のリファクタリング
+
+// EXPLAIN:wikipedia apiで単語をランダムに2つ取得する関数
 async function getRandomWikipediaTitle() {
   const endpoint = "https://ja.wikipedia.org/w/api.php";
   const params = {
@@ -136,7 +133,8 @@ async function getRandomWikipediaTitle() {
     format: "json",
     list: "random",
     rnnamespace: 0,
-    rnlimit: 2, // 2つのランダムタイトルを取得
+    // MEMO:2つのランダムタイトルを取得
+    rnlimit: 2,
   };
   const url = `${endpoint}?${new URLSearchParams(params).toString()}&origin=*`;
   try {
@@ -152,6 +150,7 @@ async function getRandomWikipediaTitle() {
   }
 }
 
+// EXPLAIN:3秒後にapiで取得したページのリンク先に遷移する関数。
 function wikipediaPageOpen(val) {
   return new Promise((resolve, reject) => {
     try {
@@ -169,13 +168,10 @@ function wikipediaPageOpen(val) {
   });
 }
 
-// TODO:画面遷移するとフェッチしたデータが保存されないため、storage apiのセッションストレージタイプで保存しておく。
-// TODO: 加えてユーザーが選択したデータを元にして画面遷移をするためにフェッチしたデータを一時的に保持してから対象のurlに遷移するようにする。
-// FIX: 取得配列のリファクタリング
+// EXPLAIN:始まりと終わりの言葉をランダムで取得して画面に表示する関数。ここでtimerとページ遷移関数を発火させる。
 document.getElementById("catch").addEventListener("click", async () => {
   const [randomTitle_start, randomTitle_end] = await getRandomWikipediaTitle();
   if (randomTitle_start && randomTitle_end) {
-    // MEMO: 個人が終着点のデータを登録できるようにすると面白いかも。
     const startWord = `start word : ${randomTitle_start.title}`;
     const endWord = `end word : ${randomTitle_end.title}`;
     document.getElementById("word_start").textContent = startWord;
@@ -183,7 +179,7 @@ document.getElementById("catch").addEventListener("click", async () => {
     chrome.storage.local.set({
       word_start: randomTitle_start.title,
       word_end: randomTitle_end.title,
-      number_of_steps: randomNumberFunc(), // ランダムな数をカウント
+      number_of_steps: randomNumberFunc(),
     });
     timer();
     await wikipediaPageOpen(randomTitle_start.title);
@@ -192,6 +188,7 @@ document.getElementById("catch").addEventListener("click", async () => {
   }
 });
 
+// EXPLAIN:メッセージを受け取り、ポップアップを自動で閉じる関数。
 chrome.runtime.onMessage.addListener((message) => {
   if (message.action === "close_popup") {
     window.close();
