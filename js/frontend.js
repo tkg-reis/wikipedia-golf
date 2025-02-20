@@ -242,3 +242,16 @@ async function checkWikipediaURL(data) {
   const response = await fetch(baseURL);
   return response.ok;
 }
+
+document.querySelector("#checkbox").addEventListener("change", async (e) => {
+  const isChecked = e.target.checked;
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+  chrome.tabs.sendMessage(
+    tab.id,
+    { 
+      action: "switchDomEffect",
+      enabled: isChecked
+    }
+  );
+});
