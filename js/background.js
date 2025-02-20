@@ -79,11 +79,13 @@ chrome.alarms.onAlarm.addListener((alarm) => {
       type: "basic",
       iconUrl: "../img/wikipedia-golf_ver2.png",
       title: "タイマー終了",
-      message: "60秒が経過しました! 拡張機能をクリックして結果を確認しましょう",
+      message: "設定した制限時間が経過しました! 拡張機能をクリックして結果を確認しましょう",
       priority: 2
     });
     chrome.storage.local.remove("endTime", () => {
-      chrome.runtime.sendMessage({ action: "close_popup" });
+      chrome.runtime.sendMessage({ action: "close_popup" }).catch((error) => {
+        console.log(error);
+    });
     });
   }
 });

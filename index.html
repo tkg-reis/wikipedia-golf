@@ -26,17 +26,21 @@
     <p id="word_start"></p>
     <p id="word_end"></p>
     <p id="result_value"></p>
-    <!-- <form action="">
+    <div>
         <label for="url">
-            input valid wikipedia url
-            <input name="url" type="url">
+            input word : 
+            <input name="url" type="url" id="url" placeholder="input valid word">
         </label>
-        <select name="time" id="" aria-placeholder="select any time">
-            <option value="60">60</option>
-            <option value="90">90</option>
-            <option value="120">120</option>
-        </select>
-    </form> -->
+    </div>
+    <div>
+        <label for="second">set limit : 
+            <select id="second">
+                <option selected value="60">60</option>
+                <option value="90">90</option>
+                <option value="120">120</option>
+            </select>
+        </label>
+    </div>
     <button id="catch">start wikipedia-golf</button>
     <script src="js/frontend.js"></script>
 </body>
