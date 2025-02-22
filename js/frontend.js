@@ -12,7 +12,7 @@ const timer = (time = 60) => {
 // EXPLAIN:ポップアップを表示する際に手数や始まり、終わりの言葉、制限時間を管理する。手数か制限時間が切れる、または手数以内で目的の言葉までたどり着けば、これまで遷移したurlのデータを配列でポップアップに表示する。
 document.addEventListener("DOMContentLoaded", async () => {
   
-  chrome.storage.local.get(["visitCount","wordList","word_start","word_end","number_of_steps","resultValue","returnCheckVal", "endTime"],
+  chrome.storage.local.get(["visitCount","wordList","word_start","word_end","number_of_steps","returnCheckVal", "endTime"],
     (result) => {
       const count = result.visitCount || 0;
       const wordList = result.wordList || [];
@@ -22,11 +22,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       const endtime = result.endTime;
       const remainingTime = endtime ? Math.max(0, Math.floor((endtime - Date.now()) / 1000)) : null;
       let tempCurrentWord = "";
+      const table = document.querySelector("#table");
+      let val = "";
       if (wordList.length > 0) {
-        for (const word of wordList) {
-          document.getElementById("chainWords").textContent += `${word} =>`;
-          tempCurrentWord = word;
+        for (let i = 0; i < wordList.length; i++) {
+          val += `
+          <tr>
+          <td>step${i + 1}</td>
+          <td>${wordList[i]}</td>
+          </tr>
+          `
+          tempCurrentWord = wordList[i];
         }
+        table.innerHTML += val;
       }
       if (word_start && word_end && number_of_steps) {
         document.getElementById("word_start").textContent = `start word : ${word_start}`;
@@ -45,8 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("second").removeAttribute("disabled");
         document.getElementById("url").removeAttribute("disabled");
         chrome.storage.local.set({
-          returnCheckVal : checkValue(word_end, wordList[wordList.length - 1]),
-          resultValue : wordList.toString(),
+          returnCheckVal : checkValue(word_end, wordList[wordList.length - 1])
         }).then(() => {
           chrome.storage.local.remove(
             [
@@ -64,7 +71,6 @@ document.addEventListener("DOMContentLoaded", async () => {
               document.getElementById("word_end").textContent = "Please push bottom button!";
               document.getElementById("number_of_steps").textContent = "Not set count";
               document.getElementById("count").textContent = "Not set count";
-              document.getElementById("chainWords").textContent = "";
               document.getElementById("remaining-time").textContent = "Not set time";
             }
           )
@@ -80,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // EXPLAIN:遷移した時に取得したurlを配列で格納。
   const updateResultValue = async () => {
     const result = await new Promise((resolve, reject) => {
-      chrome.storage.local.get(["resultValue", "returnCheckVal"], (res) => {
+      chrome.storage.local.get("returnCheckVal", (res) => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         } else {
@@ -90,10 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     const resultElement = document.getElementById("result_value");
     if (resultElement) {
-      resultElement.textContent =
-        result.resultValue && result.returnCheckVal
-          ? (result.resultValue || "") + (result.returnCheckVal || "")
-          : "No result";
+      resultElement.textContent = result.returnCheckVal
     }
   };
 });
@@ -120,11 +123,14 @@ updateRemainingTime();
 
 // EXPLAIN:終わりの言葉と自分がたどってきたurlの道の終着点のデータを判定してsuccess/failureを出力する関数。
 function checkValue(endtWord, resultWord) {
-  if (endtWord == resultWord) {
-    return "\n success";
-  } else {
-    return "\n failure";
+  if(endtWord != undefined && resultWord != undefined) {
+    if (endtWord == resultWord) {
+      return "\n success";
+    } else {
+      return "\n failure";
+    }
   }
+  return "No result"
 }
 
 // EXPLAIN:ランダムな数を生成する関数
