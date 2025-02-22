@@ -67,11 +67,11 @@ document.addEventListener("DOMContentLoaded", async () => {
               "selectedURLOption"
             ],
             () => {
-              document.getElementById("word_start").textContent = "Not started game!";
+              document.getElementById("word_start").textContent = "The game has not started yet!";
               document.getElementById("word_end").textContent = "Please push bottom button!";
-              document.getElementById("number_of_steps").textContent = "Not set count";
-              document.getElementById("count").textContent = "Not set count";
-              document.getElementById("remaining-time").textContent = "Not set time";
+              document.getElementById("number_of_steps").textContent = "Your count is no set";
+              document.getElementById("count").textContent = "Welcome to wikipedia-golf!";
+              document.getElementById("remaining-time").textContent = "Your time is not set";
             }
           )
         }).then(() => {
