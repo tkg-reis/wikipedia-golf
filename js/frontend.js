@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     const resultElement = document.getElementById("result_value");
     if (resultElement) {
-      resultElement.textContent = result.returnCheckVal
+      resultElement.innerHTML = result.returnCheckVal
     }
   };
 });
@@ -123,16 +123,27 @@ updateRemainingTime();
 
 // EXPLAIN:終わりの言葉と自分がたどってきたurlの道の終着点のデータを判定してsuccess/failureを出力する関数。
 function checkValue(endtWord, resultWord) {
-  if(endtWord != undefined && resultWord != undefined) {
+  if(endtWord != "" && resultWord != undefined) {
     if (endtWord == resultWord) {
-      return "\n success";
+      return outputImg("success");
     } else {
-      return "\n failure";
+      return outputImg("failure");;
     }
   }
   return "No result"
 }
 
+function outputImg(result) {
+  if(result === "success") {
+    const imgPath = "img/cupin_img.webp";
+    const imgAlt = "successImg";
+    return `<img src='${imgPath}' alt='${imgAlt}'>`
+  } else if(result === "failure") {
+    const imgPath = "img/cupin_img.webp";
+    const imgAlt = "failureImg";
+    return `<img src='${imgPath}' alt='${imgAlt}'>`
+  }
+}
 // EXPLAIN:ランダムな数を生成する関数
 const randomNumberFunc = () => {
   return Math.floor(Math.random() * (9 - 5 + 1)) + 5;
