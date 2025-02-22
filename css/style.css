@@ -53,9 +53,29 @@ button {
   margin: 25px 0;
 }
 
+input, select {
+  font-size: 0.7rem;
+  color: #e2e2e2;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background: #252525;
+  cursor: pointer;
+  margin: 10px 0;
+}
+
 button:disabled {
     background: #d4d4d4;
     cursor: not-allowed;
+}
+
+input:disabled {
+  background: #d4d4d4;
+  cursor: not-allowed;
+}
+
+select:disabled {
+  background: #d4d4d4;
+  cursor: not-allowed;
 }
 
 .flex {
