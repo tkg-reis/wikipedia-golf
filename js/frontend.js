@@ -135,11 +135,11 @@ function checkValue(endtWord, resultWord) {
 
 function outputImg(result) {
   if(result === "success") {
-    const imgPath = "img/cupin_img.webp";
+    const imgPath = "img/giffycanvas-success.gif";
     const imgAlt = "successImg";
     return `<img src='${imgPath}' alt='${imgAlt}'>`
   } else if(result === "failure") {
-    const imgPath = "img/cupin_img.webp";
+    const imgPath = "img/giffycanvas-failure.gif";
     const imgAlt = "failureImg";
     return `<img src='${imgPath}' alt='${imgAlt}'>`
   }
