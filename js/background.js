@@ -89,3 +89,13 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     });
   }
 });
+
+// EXPLAIN:ページを読み込む前に該当の部分にcssを流しこむ処理
+chrome.webNavigation.onCommitted.addListener((details) => {
+  if (details.frameId === 0) { // メインフレームのみ適用
+    chrome.scripting.insertCSS({
+      target: { tabId: details.tabId },
+      css: ".vector-header-end { display: none !important; }"
+    }).catch(console.error);
+  }
+});
