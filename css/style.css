@@ -91,3 +91,11 @@ select:disabled {
 .flex div {
   flex: 1;
 }
+
+.wikipedia-content {
+  display: none;
+}
+
+.active {
+  display: block;
+}

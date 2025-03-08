@@ -1,3 +1,4 @@
+// wikipedia-golf
 // EXPLAIN:制限時間設定関数、関数発火時設定秒数とalarm apiの作成をする。
 const timer = (time = 60) => {
   const intedTime = Number(time)
@@ -259,3 +260,14 @@ async function checkWikipediaURL(data) {
   const response = await fetch(baseURL);
   return response.ok;
 }
+
+// ***************************************************************************
+//wikipedia-compare
+// EXPLAIN:
+document.querySelectorAll('input[name="view"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+      document.querySelectorAll('.wikipedia-content').forEach(div => div.classList.remove('active'));
+      document.getElementById(this.value).classList.add('active');
+  });
+});
+
