@@ -1,3 +1,4 @@
+// wikipedia-golf
 // EXPLAIN:制限時間設定関数、関数発火時設定秒数とalarm apiの作成をする。
 const timer = (time = 60) => {
   const intedTime = Number(time)
@@ -258,4 +259,61 @@ async function checkWikipediaURL(data) {
   const baseURL = `https://ja.wikipedia.org/wiki/${encodeURIComponent(data)}`;
   const response = await fetch(baseURL);
   return response.ok;
+}
+
+// ***************************************************************************
+//wikipedia-compare
+// EXPLAIN:
+document.querySelectorAll('input[name="view"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+      document.querySelectorAll('.wikipedia-content').forEach(div => div.classList.remove('active'));
+      document.getElementById(this.value).classList.add('active');
+  });
+});
+
+document.getElementById('catch-data').addEventListener('click', async() => {
+  try {
+    document.getElementById("compare-first-count").textContent = "";
+    document.getElementById("compare-second-count").textContent = "";
+    const randomTitle = await getRandomWikipediaTitle();
+    const tmpCountData = randomTitle.map(title => getWikipediaViewCount(title.id));
+    const [compareFirstCount, compareSecondCount] = await Promise.all(tmpCountData);
+    console.log(compareFirstCount);
+    console.log(compareSecondCount);
+    document.getElementById("compare-first").textContent = randomTitle[0].title;
+    document.getElementById("compare-second").textContent = randomTitle[1].title;
+    setTimeout(() => {
+      document.getElementById("compare-first-count").textContent = compareFirstCount
+      document.getElementById("compare-second-count").textContent = compareSecondCount
+    }, 5000);
+  } catch (error) {
+    throw new Error(`Error getting ${error}`);
+  }
+});
+
+async function getWikipediaViewCount(pageid) {
+  const endpoint = "https://ja.wikipedia.org/w/api.php";
+  const params = {
+    action: "query",
+    prop: "pageviews",
+    format: "json",
+    pageids : pageid
+  };
+  const url = `${endpoint}?${new URLSearchParams(params).toString()}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTPエラー: ${response.status}`);
+    }
+    const data = await response.json();
+    const countobject = data.query.pages[pageid].pageviews;
+    let count = 0; 
+    for(num of Object.values(countobject)) {
+      if(num === null) continue;
+      count += num
+    }
+    return count;
+  } catch (error) {
+    return null;
+  }
 }

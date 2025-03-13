@@ -1,47 +1,74 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./css/style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./css/style.css" />
     <title>wikipedia-golf</title>
-</head>
-<body>
-    <div class="flex">    
-        <h1>wikipedia-golf</h1>
-        <div>
-            <img src="./img/wikipedia-golf_ver2.png" alt="" class="img">
-        </div>
+  </head>
+  <body>
+    <div class="flex">
+      <h1>wikipedia-golf</h1>
+      <div>
+        <img src="./img/wikipedia-golf_ver2.png" alt="" class="img" />
+      </div>
     </div>
-    <h2>
+    <label>
+      <input type="radio" name="view" value="wikipedia-golf" checked /> wikipedia-golf
+    </label>
+    <label>
+        <input type="radio" name="view" value="wikipedia-compare" /> wikipedia-compare
+    </label>
+    <div id="wikipedia-golf" class="wikipedia-content active">
+      <h2>
         <span id="count"></span>
-    </h2>
-    <h2>
+      </h2>
+      <h2>
         <span id="number_of_steps"></span>
-    </h2>
-    <p>
+      </h2>
+      <p>
         <span id="remaining-time"></span>
-    </p>
-    <table id="table"></table>
-    <p id="word_start"></p>
-    <p id="word_end"></p>
-    <div id="result_value"></div>
-    <div>
+      </p>
+      <table id="table"></table>
+      <p id="word_start"></p>
+      <p id="word_end"></p>
+      <div id="result_value"></div>
+      <div>
         <label for="url">
-            input ending word : 
-            <input name="url" type="url" id="url" placeholder="input valid word">
+          input ending word :
+          <input
+            name="url"
+            type="url"
+            id="url"
+            placeholder="input valid word"
+          />
         </label>
-    </div>
-    <div>
-        <label for="second">set time : 
-            <select id="second">
-                <option selected value="60">60</option>
-                <option value="90">90</option>
-                <option value="120">120</option>
-            </select>
+      </div>
+      <div>
+        <label for="second"
+          >set time :
+          <select id="second">
+            <option value="60" selected>60</option>
+            <option value="90">90</option>
+            <option value="120">120</option>
+          </select>
         </label>
+      </div>
+      <button id="catch">start wikipedia-golf</button>
     </div>
-    <button id="catch">start wikipedia-golf</button>
+
+    <div id="wikipedia-compare" class="wikipedia-content">
+        <h2>Welcome to wikipedia-compare!</h2>
+        <p>This is the total data for the past two months</p>
+        <p>Please press below button</p>
+        <p>You can watch answer after 3 seconds</p>
+        <h2><span id="compare-first"></span></h2>
+        <h2><span id="compare-first-count"></span></h2>
+        <h2><span id="compare-second"></span></h2>
+        <h2><span id="compare-second-count"></span></h2>
+        <button id="catch-data">start wikipedia-compare</button>
+    </div>
+
     <script src="js/frontend.js"></script>
-</body>
+  </body>
 </html>
