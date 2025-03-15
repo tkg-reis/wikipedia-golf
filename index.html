@@ -29,32 +29,49 @@
       <p>
         <span id="remaining-time"></span>
       </p>
-      <table id="table"></table>
+      <p id="chainWords"></p>
       <p id="word_start"></p>
       <p id="word_end"></p>
-      <div id="result_value"></div>
+      <p id="result_value"></p>
       <div>
-        <label for="url">
-          input ending word :
-          <input
-            name="url"
-            type="url"
-            id="url"
-            placeholder="input valid word"
-          />
-        </label>
+          <p>Function Toggle : </p>
+          <label class="toggle-switch">
+              <input type="checkbox" id="checkbox">
+              <div class="toggle-switch-background">
+                  <div class="toggle-switch-handle"></div>
+              </div>
+          </label>
       </div>
+
       <div>
-        <label for="second"
-          >set time :
-          <select id="second">
-            <option value="60" selected>60</option>
-            <option value="90">90</option>
-            <option value="120">120</option>
-          </select>
-        </label>
+        </p>
+        <table id="table"></table>
+        <p id="word_start"></p>
+        <p id="word_end"></p>
+        <div id="result_value"></div>
+        <div>
+          <label for="url">
+            input ending word :
+            <input
+              name="url"
+              type="url"
+              id="url"
+              placeholder="input valid word"
+            />
+          </label>
+        </div>
+        <div>
+          <label for="second"
+            >set time :
+            <select id="second">
+              <option value="60" selected>60</option>
+              <option value="90">90</option>
+              <option value="120">120</option>
+            </select>
+          </label>
+        </div>
+        <button id="catch">start wikipedia-golf</button>
       </div>
-      <button id="catch">start wikipedia-golf</button>
     </div>
 
     <div id="wikipedia-compare" class="wikipedia-content">
