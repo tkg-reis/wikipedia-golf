@@ -23,7 +23,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: how to do
+    id: how
     attributes:
       label: どうすれば実装できるか。
       description: エンハンスメントのためになにか提案などがあれば記入してください。
