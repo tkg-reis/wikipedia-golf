@@ -1,62 +1,42 @@
-name: Hot Bug Report
-description: File a bug report
-title: "[Bug]: "
-labels: ["bug", "triage"]
+name: バグ修正
+description: バグの修正のテンプレート
+title: "バグ: "
+labels: ["bug"]
 assignees:
   - octocat
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Thanks for taking the time to fill out this bug report!
   - type: input
-    id: contact
+    id : title
     attributes:
-      label: Contact Details
-      description: How can we get in touch with you if we need more info?
-      placeholder: ex. email@example.com
+     label: バグの修正のタイトル
+     placeholder: バグの修正のタイトル
+     value: "バグ修正: "
+    validations:
+      required: true
+  - type: textarea
+    id: contents
+    attributes:
+      label: バグの内容
+      description: バグの内容を具体的に記載してください。
+      placeholder: 制限時間内にゲームが終了しても時間が経つとalarmのpopupが出てしまう。
+      value: "- "
+    validations:
+      required: true
+  - type: textarea
+    id: resolve
+    attributes:
+      label: バグの解決
+      description: バグ解決のためになにか提案などがあれば記入してください。
+      placeholder: このサイトを参考にしてみてください。
+      value: "- "
     validations:
       required: false
   - type: textarea
-    id: what-happened
+    id: memo
     attributes:
-      label: What happened?
-      description: Also tell us, what did you expect to happen?
-      placeholder: Tell us what you see!
-      value: "A bug happened!"
+      label: その他
+      description: その他メモ
+      placeholder: なにか気になる点があれば記入してください。
+      value: "- "
     validations:
-      required: true
-  - type: dropdown
-    id: version
-    attributes:
-      label: Version
-      description: What version of our software are you running?
-      options:
-        - 1.0.2 (Default)
-        - 1.0.3 (Edge)
-    validations:
-      required: true
-  - type: dropdown
-    id: browsers
-    attributes:
-      label: What browsers are you seeing the problem on?
-      multiple: true
-      options:
-        - Firefox
-        - Chrome
-        - Safari
-        - Microsoft Edge
-  - type: textarea
-    id: logs
-    attributes:
-      label: Relevant log output
-      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
-      render: shell
-  - type: checkboxes
-    id: terms
-    attributes:
-      label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://example.com)
-      options:
-        - label: I agree to follow this project's Code of Conduct
-          required: true
+      required: false
