@@ -1,3 +1,4 @@
+// wikipedia-golf
 // EXPLAIN:制限時間設定関数、関数発火時設定秒数とalarm apiの作成をする。
 const timer = (time = 60) => {
   const intedTime = Number(time)
@@ -12,7 +13,7 @@ const timer = (time = 60) => {
 // EXPLAIN:ポップアップを表示する際に手数や始まり、終わりの言葉、制限時間を管理する。手数か制限時間が切れる、または手数以内で目的の言葉までたどり着けば、これまで遷移したurlのデータを配列でポップアップに表示する。
 document.addEventListener("DOMContentLoaded", async () => {
   
-  chrome.storage.local.get(["visitCount","wordList","word_start","word_end","number_of_steps","resultValue","returnCheckVal", "endTime"],
+  chrome.storage.local.get(["visitCount","wordList","word_start","word_end","number_of_steps","returnCheckVal", "endTime"],
     (result) => {
       const count = result.visitCount || 0;
       const wordList = result.wordList || [];
@@ -22,11 +23,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       const endtime = result.endTime;
       const remainingTime = endtime ? Math.max(0, Math.floor((endtime - Date.now()) / 1000)) : null;
       let tempCurrentWord = "";
+      const table = document.querySelector("#table");
+      let val = "";
       if (wordList.length > 0) {
-        for (const word of wordList) {
-          document.getElementById("chainWords").textContent += `${word} =>`;
-          tempCurrentWord = word;
+        for (let i = 0; i < wordList.length; i++) {
+          val += `
+          <tr>
+          <td>step${i + 1}</td>
+          <td>${wordList[i]}</td>
+          </tr>
+          `
+          tempCurrentWord = wordList[i];
         }
+        table.innerHTML += val;
       }
       if (word_start && word_end && number_of_steps) {
         document.getElementById("word_start").textContent = `start word : ${word_start}`;
@@ -45,8 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("second").removeAttribute("disabled");
         document.getElementById("url").removeAttribute("disabled");
         chrome.storage.local.set({
-          returnCheckVal : checkValue(word_end, wordList[wordList.length - 1]),
-          resultValue : wordList.toString(),
+          returnCheckVal : checkValue(word_end, wordList[wordList.length - 1])
         }).then(() => {
           chrome.storage.local.remove(
             [
@@ -60,12 +68,11 @@ document.addEventListener("DOMContentLoaded", async () => {
               "selectedURLOption"
             ],
             () => {
-              document.getElementById("word_start").textContent = "Not started game!";
+              document.getElementById("word_start").textContent = "The game has not started yet!";
               document.getElementById("word_end").textContent = "Please push bottom button!";
-              document.getElementById("number_of_steps").textContent = "Not set count";
-              document.getElementById("count").textContent = "Not set count";
-              document.getElementById("chainWords").textContent = "";
-              document.getElementById("remaining-time").textContent = "Not set time";
+              document.getElementById("number_of_steps").textContent = "Your count is no set";
+              document.getElementById("count").textContent = "Welcome to wikipedia-golf!";
+              document.getElementById("remaining-time").textContent = "Your time is not set";
             }
           )
         }).then(() => {
@@ -80,7 +87,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // EXPLAIN:遷移した時に取得したurlを配列で格納。
   const updateResultValue = async () => {
     const result = await new Promise((resolve, reject) => {
-      chrome.storage.local.get(["resultValue", "returnCheckVal"], (res) => {
+      chrome.storage.local.get("returnCheckVal", (res) => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         } else {
@@ -90,10 +97,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     const resultElement = document.getElementById("result_value");
     if (resultElement) {
-      resultElement.textContent =
-        result.resultValue && result.returnCheckVal
-          ? (result.resultValue || "") + (result.returnCheckVal || "")
-          : "No result";
+      resultElement.innerHTML = result.returnCheckVal
     }
   };
 });
@@ -120,13 +124,27 @@ updateRemainingTime();
 
 // EXPLAIN:終わりの言葉と自分がたどってきたurlの道の終着点のデータを判定してsuccess/failureを出力する関数。
 function checkValue(endtWord, resultWord) {
-  if (endtWord == resultWord) {
-    return "\n success";
-  } else {
-    return "\n failure";
+  if(endtWord != "" && resultWord != undefined) {
+    if (endtWord == resultWord) {
+      return outputImg("success");
+    } else {
+      return outputImg("failure");;
+    }
   }
+  return "No result"
 }
 
+function outputImg(result) {
+  if(result === "success") {
+    const imgPath = "img/giffycanvas-success.gif";
+    const imgAlt = "successImg";
+    return `<img src='${imgPath}' alt='${imgAlt}'>`
+  } else if(result === "failure") {
+    const imgPath = "img/giffycanvas-failure.gif";
+    const imgAlt = "failureImg";
+    return `<img src='${imgPath}' alt='${imgAlt}'>`
+  }
+}
 // EXPLAIN:ランダムな数を生成する関数
 const randomNumberFunc = () => {
   return Math.floor(Math.random() * (9 - 5 + 1)) + 5;
@@ -255,3 +273,59 @@ document.querySelector("#checkbox").addEventListener("change", async (e) => {
     }
   );
 });
+// ***************************************************************************
+//wikipedia-compare
+// EXPLAIN:
+document.querySelectorAll('input[name="view"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+      document.querySelectorAll('.wikipedia-content').forEach(div => div.classList.remove('active'));
+      document.getElementById(this.value).classList.add('active');
+  });
+});
+
+document.getElementById('catch-data').addEventListener('click', async() => {
+  try {
+    document.getElementById("compare-first-count").textContent = "";
+    document.getElementById("compare-second-count").textContent = "";
+    const randomTitle = await getRandomWikipediaTitle();
+    const tmpCountData = randomTitle.map(title => getWikipediaViewCount(title.id));
+    const [compareFirstCount, compareSecondCount] = await Promise.all(tmpCountData);
+    console.log(compareFirstCount);
+    console.log(compareSecondCount);
+    document.getElementById("compare-first").textContent = randomTitle[0].title;
+    document.getElementById("compare-second").textContent = randomTitle[1].title;
+    setTimeout(() => {
+      document.getElementById("compare-first-count").textContent = compareFirstCount
+      document.getElementById("compare-second-count").textContent = compareSecondCount
+    }, 5000);
+  } catch (error) {
+    throw new Error(`Error getting ${error}`);
+  }
+});
+
+async function getWikipediaViewCount(pageid) {
+  const endpoint = "https://ja.wikipedia.org/w/api.php";
+  const params = {
+    action: "query",
+    prop: "pageviews",
+    format: "json",
+    pageids : pageid
+  };
+  const url = `${endpoint}?${new URLSearchParams(params).toString()}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTPエラー: ${response.status}`);
+    }
+    const data = await response.json();
+    const countobject = data.query.pages[pageid].pageviews;
+    let count = 0; 
+    for(num of Object.values(countobject)) {
+      if(num === null) continue;
+      count += num
+    }
+    return count;
+  } catch (error) {
+    return null;
+  }
+}

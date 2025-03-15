@@ -1,0 +1,42 @@
+name: エンハンスメント
+description: エンハンスメントのテンプレート
+title: "エンハンスメント: "
+labels: ["enhancement"]
+assignees:
+  - octocat
+body:
+  - type: input
+    id : title
+    attributes:
+     label: エンハンスメントのタイトル
+     placeholder: エンハンスメントのタイトル
+     value: "エンハンスメント: "
+    validations:
+      required: true
+  - type: textarea
+    id: contents
+    attributes:
+      label: エンハンスメントの内容
+      description: エンハンスメントの内容を具体的に記載してください。
+      placeholder: ゲーム終了時のエフェクトをもっとリッチにしてほしい。
+      value: "- "
+    validations:
+      required: true
+  - type: textarea
+    id: how
+    attributes:
+      label: どうすれば実装できるか。
+      description: エンハンスメントのためになにか提案などがあれば記入してください。
+      placeholder: このサイトを参考にしてみてください。
+      value: "- "
+    validations:
+      required: true
+  - type: textarea
+    id: memo
+    attributes:
+      label: その他
+      description: その他メモ
+      placeholder: なにか気になる点があれば記入してください。
+      value: "- "
+    validations:
+      required: false

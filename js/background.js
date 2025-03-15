@@ -89,3 +89,15 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     });
   }
 });
+
+// EXPLAIN:ページを読み込む前に該当の部分にcssを流しこむ処理
+chrome.webNavigation.onCommitted.addListener((details) => {
+  const url = details.url;
+  //MEMO: メインフレームのみ適用かつwikipediaのページのみに処理をする。
+  if (details.frameId === 0 && url.startsWith(targetURL)) { 
+    chrome.scripting.insertCSS({
+      target: { tabId: details.tabId },
+      css: ".vector-header-end { display: none !important; }"
+    }).catch(console.error);
+  }
+});

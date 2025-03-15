@@ -1,0 +1,42 @@
+name: バグ修正
+description: バグの修正のテンプレート
+title: "バグ: "
+labels: ["bug"]
+assignees:
+  - octocat
+body:
+  - type: input
+    id : title
+    attributes:
+     label: バグの修正のタイトル
+     placeholder: バグの修正のタイトル
+     value: "バグ修正: "
+    validations:
+      required: true
+  - type: textarea
+    id: contents
+    attributes:
+      label: バグの内容
+      description: バグの内容を具体的に記載してください。
+      placeholder: 制限時間内にゲームが終了しても時間が経つとalarmのpopupが出てしまう。
+      value: "- "
+    validations:
+      required: true
+  - type: textarea
+    id: resolve
+    attributes:
+      label: バグの解決
+      description: バグ解決のためになにか提案などがあれば記入してください。
+      placeholder: このサイトを参考にしてみてください。
+      value: "- "
+    validations:
+      required: false
+  - type: textarea
+    id: memo
+    attributes:
+      label: その他
+      description: その他メモ
+      placeholder: なにか気になる点があれば記入してください。
+      value: "- "
+    validations:
+      required: false
