@@ -257,9 +257,36 @@ function sanitizeHTML(input) {
 }
 
 async function checkWikipediaURL(data) {
-  const baseURL = `https://ja.wikipedia.org/wiki/${encodeURIComponent(data)}`;
-  const response = await fetch(baseURL);
-  return response.ok;
+  const trimmedData = data.trim();
+  if (!trimmedData) {
+    return false;
+  }
+
+  const endpoint = "https://ja.wikipedia.org/w/api.php";
+  const params = new URLSearchParams({
+    action: "query",
+    format: "json",
+    titles: trimmedData,
+    origin: "*"
+  });
+
+  try {
+    const response = await fetch(`${endpoint}?${params.toString()}`);
+    if (!response.ok) {
+      return false;
+    }
+
+    const data = await response.json();
+    const pages = data?.query?.pages;
+    if (!pages) {
+      return false;
+    }
+
+    return Object.values(pages).every((page) => page.missing === undefined);
+  } catch (error) {
+    console.error("wikipedia page validation error", error);
+    return false;
+  }
 }
 
 document.querySelector("#checkbox").addEventListener("change", async (e) => {
