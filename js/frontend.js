@@ -49,7 +49,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("count").textContent = `Your Current Count : ${count}`;
       
       if ((wordList.length > 0 && Number(count) >= number_of_steps) ||
-        (wordList.length > 0 && tempCurrentWord === word_end) || (remainingTime < 1)) {
+        (wordList.length > 0 && tempCurrentWord === word_end) ||
+        (remainingTime !== null && remainingTime < 1)) {
         document.getElementById("catch").removeAttribute("disabled");
         document.getElementById("second").removeAttribute("disabled");
         document.getElementById("url").removeAttribute("disabled");
