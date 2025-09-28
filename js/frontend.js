@@ -288,18 +288,7 @@ async function checkWikipediaURL(data) {
   }
 }
 
-document.querySelector("#checkbox").addEventListener("change", async (e) => {
-  const isChecked = e.target.checked;
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-  chrome.tabs.sendMessage(
-    tab.id,
-    { 
-      action: "switchDomEffect",
-      enabled: isChecked
-    }
-  );
-});
+// Highlight toggle removed in issue #38; no DOM effect messaging required here anymore.
 // ***************************************************************************
 //wikipedia-compare
 // EXPLAIN:

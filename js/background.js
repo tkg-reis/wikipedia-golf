@@ -58,18 +58,20 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       title: "ページとカウントが更新されました。",
       message: `add ${decodeURI(url).match(/\/([^\/]+)$/)[1]}`
     });
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      if (message.action === "open_popup") {
-        chrome.action.openPopup()
-          .then(() => sendResponse({ success: true }))
-          .catch((error) => {
-            sendResponse({ success: false, error: error.message });
-          });
-          return true;
-      }
-    }
-    );
   }
+});
+
+// EXPLAIN:コンテンツスクリプトからのメッセージを受け取り、ポップアップを自動で開く処理。
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "open_popup") {
+    chrome.action.openPopup()
+      .then(() => sendResponse({ success: true }))
+      .catch((error) => {
+        sendResponse({ success: false, error: error.message });
+      });
+    return true;
+  }
+  return undefined;
 });
 
 // EXPLAIN:chrome.alarms.create("timer", { delayInMinutes: 1 });のメソッドが終了した際notificationを出して、timerで定義した秒数を削除する。その後画面を一度リフレッシュさせるためにポップアップを自動で閉じる。
