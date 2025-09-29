@@ -6,10 +6,10 @@ const targetURL = "https://ja.wikipedia.org/wiki/";
 
 // EXPLAIN:カウントの作成、更新の関数
 const countTabChangeToStorage = () => {
-  chrome.storage.local.get("visitCount", (result) => {
+  chrome.storage.session.get("visitCount", (result) => {
     const currentCount = result.visitCount || 0;
     const newCount = currentCount + 1;
-    chrome.storage.local.set({ visitCount: newCount });
+    chrome.storage.session.set({ visitCount: newCount });
   });
 };
 
@@ -23,7 +23,7 @@ const replaceSpacesWithUnderscores = (value) => {
 
 // EXPLAIN:これまで踏んだurlのデータを配列としてstorage apiに格納する関数
 const saveURLToStorage = (newURL) => {
-  chrome.storage.local.get("wordList", (result) => {
+  chrome.storage.session.get("wordList", (result) => {
     let wordList = result.wordList || [];
     if (!wordList.includes(newURL)) {
       //MEMO: 正規表現で最後のパス部分を抽出
@@ -32,7 +32,7 @@ const saveURLToStorage = (newURL) => {
         const targetArryNumber = 1;
         const word = replaceSpacesWithUnderscores(extractWord[targetArryNumber]);
         const updatewordList = [...wordList, word];
-        chrome.storage.local.set({ wordList: updatewordList }, () => {
+        chrome.storage.session.set({ wordList: updatewordList }, () => {
           if (chrome.runtime.lastError) {
             console.error("Error saving URL:", chrome.runtime.lastError);
           } else {
@@ -84,10 +84,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
       message: "設定した制限時間が経過しました! 拡張機能をクリックして結果を確認しましょう",
       priority: 2
     });
-    chrome.storage.local.remove("endTime", () => {
-      chrome.runtime.sendMessage({ action: "close_popup" }).catch((error) => {
-        console.log(error);
-    });
+    chrome.runtime.sendMessage({ action: "close_popup" }).catch((error) => {
+      console.log(error);
     });
   }
 });
