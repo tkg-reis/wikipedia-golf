@@ -1,117 +1,208 @@
 // wikipedia-golf
 // EXPLAIN:制限時間設定関数、関数発火時設定秒数とalarm apiの作成をする。
 const timer = (time = 60) => {
-  const intedTime = Number(time)
+  const intedTime = Number(time);
   const endTime = Date.now() + intedTime * 1000; // 現在時刻 + X秒
-  const delayInMinutes = intedTime / 60 
+  const delayInMinutes = intedTime / 60;
   // 終了時刻を保存
-  chrome.storage.local.set({ endTime: endTime }, () => {
+  chrome.storage.session.set({ endTime: endTime }, () => {
     chrome.alarms.create("timer", { delayInMinutes: delayInMinutes });
+  });
+};
+
+const updateResultValue = async () => {
+  const { returnCheckVal = "No result" } = await chrome.storage.session.get(["returnCheckVal"]);
+  const resultElement = document.getElementById("result_value");
+  if (!resultElement) {
+    return;
+  }
+
+  if (returnCheckVal && returnCheckVal !== "No result") {
+    resultElement.innerHTML = returnCheckVal;
+  } else {
+    resultElement.textContent = "No result";
+  }
+};
+
+const toggleGameInputs = (shouldDisable) => {
+  const controls = ["catch", "second", "url"];
+  controls.forEach((id) => {
+    const element = document.getElementById(id);
+    if (!element) {
+      return;
+    }
+
+    if (shouldDisable) {
+      element.setAttribute("disabled", true);
+    } else {
+      element.removeAttribute("disabled");
+    }
+  });
+};
+
+const applyDefaultGameCopy = () => {
+  const defaultCopy = {
+    "word_start": "The game has not started yet!",
+    "word_end": "Please push bottom button!",
+    "number_of_steps": "Your count is no set",
+    "remaining-time": "Your time is not set",
+  };
+
+  Object.entries(defaultCopy).forEach(([id, message]) => {
+    const node = document.getElementById(id);
+    if (node) {
+      node.textContent = message;
+    }
   });
 };
 
 // EXPLAIN:ポップアップを表示する際に手数や始まり、終わりの言葉、制限時間を管理する。手数か制限時間が切れる、または手数以内で目的の言葉までたどり着けば、これまで遷移したurlのデータを配列でポップアップに表示する。
 document.addEventListener("DOMContentLoaded", async () => {
-  
-  chrome.storage.local.get(["visitCount","wordList","word_start","word_end","number_of_steps","returnCheckVal", "endTime"],
-    (result) => {
-      const count = result.visitCount || 0;
-      const wordList = result.wordList || [];
-      const word_start = result.word_start || "";
-      const word_end = result.word_end || "";
-      const number_of_steps = result.number_of_steps || 0;
-      const endtime = result.endTime;
-      const remainingTime = endtime ? Math.max(0, Math.floor((endtime - Date.now()) / 1000)) : null;
-      let tempCurrentWord = "";
-      const table = document.querySelector("#table");
-      let val = "";
-      if (wordList.length > 0) {
-        for (let i = 0; i < wordList.length; i++) {
-          val += `
-          <tr>
-          <td>step${i + 1}</td>
-          <td>${wordList[i]}</td>
-          </tr>
-          `
-          tempCurrentWord = wordList[i];
-        }
-        table.innerHTML += val;
-      }
-      if (word_start && word_end && number_of_steps) {
-        document.getElementById("word_start").textContent = `start word : ${word_start}`;
-        document.getElementById("word_end").textContent = `end word : ${word_end}`;
-        document.getElementById("number_of_steps").textContent = `Your limitation Count : ${number_of_steps}`;
-        document.getElementById("catch").setAttribute("disabled", true);
-        document.getElementById("second").setAttribute("disabled", true);
-        document.getElementById("url").setAttribute("disabled", true);
-      }
+  try {
+    const sessionKeys = [
+      "visitCount",
+      "wordList",
+      "word_start",
+      "word_end",
+      "number_of_steps",
+      "returnCheckVal",
+      "endTime",
+      "gameStatus",
+    ];
+    let sessionData = await chrome.storage.session.get(sessionKeys);
 
-      document.getElementById("count").textContent = `Your Current Count : ${count}`;
-      
-      if ((wordList.length > 0 && Number(count) >= number_of_steps) ||
-        (wordList.length > 0 && tempCurrentWord === word_end) || (remainingTime < 1)) {
-        document.getElementById("catch").removeAttribute("disabled");
-        document.getElementById("second").removeAttribute("disabled");
-        document.getElementById("url").removeAttribute("disabled");
-        chrome.storage.local.set({
-          returnCheckVal : checkValue(word_end, wordList[wordList.length - 1])
-        }).then(() => {
-          chrome.storage.local.remove(
-            [
-              "wordList",
-              "visitCount",
-              "word_start",
-              "word_end",
-              "number_of_steps",
-              "endTime",
-              "selectedSecondOption",
-              "selectedURLOption"
-            ],
-            () => {
-              document.getElementById("word_start").textContent = "The game has not started yet!";
-              document.getElementById("word_end").textContent = "Please push bottom button!";
-              document.getElementById("number_of_steps").textContent = "Your count is no set";
-              document.getElementById("count").textContent = "Welcome to wikipedia-golf!";
-              document.getElementById("remaining-time").textContent = "Your time is not set";
-            }
-          )
-        }).then(() => {
-          updateResultValue().catch((error) => {
-            console.error("エラー:", error);
-          });
-        })
-      }
-    }
-  );
-
-  // EXPLAIN:遷移した時に取得したurlを配列で格納。
-  const updateResultValue = async () => {
-    const result = await new Promise((resolve, reject) => {
-      chrome.storage.local.get("returnCheckVal", (res) => {
-        if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError);
-        } else {
-          resolve(res);
+    if (!sessionData.gameStatus && (!sessionData.wordList || sessionData.wordList.length === 0)) {
+      const legacyData = await chrome.storage.local.get(sessionKeys);
+      const hasLegacyData = Object.entries(legacyData).some(([key, value]) => {
+        if (key === "wordList") {
+          return Array.isArray(value) && value.length > 0;
         }
+        return Boolean(value);
       });
-    });
-    const resultElement = document.getElementById("result_value");
-    if (resultElement) {
-      resultElement.innerHTML = result.returnCheckVal
+
+      if (hasLegacyData) {
+        const derivedStatus = legacyData.word_start ? "completed" : "idle";
+        sessionData = {
+          ...legacyData,
+          gameStatus: derivedStatus,
+        };
+        await chrome.storage.session.set({
+          ...legacyData,
+          gameStatus: derivedStatus,
+        });
+        await chrome.storage.local.remove(sessionKeys);
+      }
     }
-  };
+
+    const {
+      visitCount = 0,
+      wordList = [],
+      word_start = "",
+      word_end = "",
+      number_of_steps = 0,
+      returnCheckVal = "No result",
+      endTime,
+      gameStatus = "idle",
+    } = sessionData;
+
+    const table = document.querySelector("#table");
+    if (table) {
+      let rows = "";
+      wordList.forEach((word, index) => {
+        rows += `
+          <tr>
+            <td>step${index + 1}</td>
+            <td>${word}</td>
+          </tr>`;
+      });
+      table.innerHTML = rows;
+    }
+
+    if (word_start && word_end && number_of_steps) {
+      document.getElementById("word_start").textContent = `start word : ${word_start}`;
+      document.getElementById("word_end").textContent = `end word : ${word_end}`;
+      document.getElementById("number_of_steps").textContent = `Your limitation Count : ${number_of_steps}`;
+    } else {
+      applyDefaultGameCopy();
+    }
+
+    if (gameStatus === "idle") {
+      document.getElementById("count").textContent = "Welcome to wikipedia-golf!";
+    } else {
+      document.getElementById("count").textContent = `Your Current Count : ${visitCount}`;
+    }
+
+    toggleGameInputs(gameStatus === "inProgress");
+
+    const remainingTime = endTime ? Math.max(0, Math.floor((endTime - Date.now()) / 1000)) : null;
+    if (remainingTime !== null) {
+      document.getElementById("remaining-time").textContent = `time limit : ${remainingTime} sec`;
+    } else if (gameStatus !== "inProgress") {
+      document.getElementById("remaining-time").textContent = "Your time is not set";
+    }
+
+    const lastVisitedWord = wordList[wordList.length - 1];
+    const hasReachedStepLimit = number_of_steps > 0 && visitCount >= number_of_steps;
+    const hasReachedGoal = Boolean(word_end && lastVisitedWord && word_end === lastVisitedWord);
+    const isTimeUp = remainingTime !== null && remainingTime < 1;
+
+    if (gameStatus === "inProgress" && (hasReachedStepLimit || hasReachedGoal || isTimeUp)) {
+      const checkResult = checkValue(word_end, lastVisitedWord);
+      await chrome.storage.session.set({
+        gameStatus: "completed",
+        returnCheckVal: checkResult,
+      });
+
+      if (isTimeUp) {
+        await chrome.storage.session.remove("endTime");
+      }
+
+      toggleGameInputs(false);
+      await updateResultValue();
+    } else if (gameStatus === "completed") {
+      await updateResultValue();
+    } else if (gameStatus === "idle") {
+      const resultElement = document.getElementById("result_value");
+      if (resultElement) {
+        resultElement.textContent = "No result";
+      }
+    } else if (returnCheckVal) {
+      // Fallback when migrating from older storage state
+      const resultElement = document.getElementById("result_value");
+      if (resultElement) {
+        resultElement.innerHTML = returnCheckVal;
+      }
+    }
+  } catch (error) {
+    console.error("Failed to initialize popup:", error);
+  }
 });
 
 // EXPLAIN:制限時間をポップアップに表示するための機能
 function updateRemainingTime() {
-  chrome.storage.local.get("endTime", (data) => {
+  chrome.storage.session.get(["endTime", "gameStatus"], (data) => {
+    const remainingTimeNode = document.getElementById("remaining-time");
+    if (!remainingTimeNode) {
+      return;
+    }
+
     if (data.endTime) {
       const remainingTime = Math.max(0, Math.floor((data.endTime - Date.now()) / 1000));
-      document.getElementById("remaining-time").textContent = `time limit : ${remainingTime} sec`;
+      remainingTimeNode.textContent = `time limit : ${remainingTime} sec`;
       // MEMO:0にするとfalsyな値になるため処理が面倒になる。
       if (remainingTime < 1) {
-        chrome.storage.local.remove("endTime");
+        chrome.storage.session.remove("endTime", () => {
+          if (chrome.runtime.lastError) {
+            console.error("Failed to clear endTime", chrome.runtime.lastError);
+            return;
+          }
+          if (data.gameStatus !== "inProgress") {
+            remainingTimeNode.textContent = "Your time is not set";
+          }
+        });
       }
+    } else if (data.gameStatus !== "inProgress") {
+      remainingTimeNode.textContent = "Your time is not set";
     }
   });
 }
@@ -213,24 +304,64 @@ document.getElementById("url").addEventListener("change", async(e) => {
 })
 // EXPLAIN:始まりと終わりの言葉をランダムで取得して画面に表示する関数。ここでtimerとページ遷移関数を発火させる。
 document.getElementById("catch").addEventListener("click", async () => {
-  const [randomTitle_start, randomTitle_end] = await getRandomWikipediaTitle();
-  if (randomTitle_start && randomTitle_end) {
-    chrome.storage.local.get(["selectedURLOption","selectedSecondOption"], (data) => {
-      const startWord = `start word : ${randomTitle_start.title}`;
-      const endWord = `end word : ${data.selectedURLOption ? data.selectedURLOption : randomTitle_end.title}`;
-      document.getElementById("word_start").textContent = startWord;
-      document.getElementById("word_end").textContent = endWord;
+  try {
+    toggleGameInputs(true);
 
-      chrome.storage.local.set({
-        word_start: randomTitle_start.title,
-        word_end: data.selectedURLOption ? data.selectedURLOption : randomTitle_end.title,
-        number_of_steps: randomNumberFunc(),
-      });
-      timer(data.selectedSecondOption ? data.selectedSecondOption : 60);
-    })
+    const table = document.querySelector("#table");
+    if (table) {
+      table.innerHTML = "";
+    }
+
+    await chrome.storage.session.remove("endTime");
+    await chrome.storage.session.set({
+      visitCount: 0,
+      wordList: [],
+      returnCheckVal: "No result",
+      gameStatus: "inProgress",
+    });
+
+    document.getElementById("count").textContent = "Your Current Count : 0";
+    await updateResultValue();
+
+    const randomTitles = await getRandomWikipediaTitle();
+    if (!randomTitles || randomTitles.length < 2) {
+      console.log("タイトルの取得に失敗しました。");
+      toggleGameInputs(false);
+      applyDefaultGameCopy();
+      document.getElementById("count").textContent = "Welcome to wikipedia-golf!";
+      return;
+    }
+
+    const [randomTitle_start, randomTitle_end] = randomTitles;
+    const { selectedURLOption, selectedSecondOption } = await chrome.storage.local.get([
+      "selectedURLOption",
+      "selectedSecondOption",
+    ]);
+
+    const endWordTitle = selectedURLOption ? selectedURLOption : randomTitle_end.title;
+    const startWordCopy = `start word : ${randomTitle_start.title}`;
+    const endWordCopy = `end word : ${endWordTitle}`;
+
+    document.getElementById("word_start").textContent = startWordCopy;
+    document.getElementById("word_end").textContent = endWordCopy;
+
+    const numberOfSteps = randomNumberFunc();
+    document.getElementById("number_of_steps").textContent = `Your limitation Count : ${numberOfSteps}`;
+
+    await chrome.storage.session.set({
+      word_start: randomTitle_start.title,
+      word_end: endWordTitle,
+      number_of_steps: numberOfSteps,
+    });
+
+    const timerSeconds = selectedSecondOption ? Number(selectedSecondOption) : 60;
+    timer(timerSeconds);
+    document.getElementById("remaining-time").textContent = `time limit : ${timerSeconds} sec`;
+
     await wikipediaPageOpen(randomTitle_start.title);
-  } else {
-    console.log("タイトルの取得に失敗しました。");
+  } catch (error) {
+    console.error("Failed to start wikipedia-golf", error);
+    toggleGameInputs(false);
   }
 });
 
