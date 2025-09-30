@@ -56,6 +56,34 @@ const applyDefaultGameCopy = () => {
   });
 };
 
+const updateCountCopy = (gameStatus, visitCount) => {
+  const countNode = document.getElementById("count");
+  if (!countNode) {
+    return;
+  }
+
+  if (gameStatus === "inProgress") {
+    countNode.textContent = `Your Current Count : ${visitCount}`;
+  } else {
+    countNode.textContent = "Welcome to wikipedia-golf!";
+  }
+};
+
+const updateTableTitle = (gameStatus, hasSteps) => {
+  const tableTitleNode = document.getElementById("table-title");
+  if (!tableTitleNode) {
+    return;
+  }
+
+  if (gameStatus === "inProgress") {
+    tableTitleNode.textContent = hasSteps ? "Current Steps" : "";
+  } else if (hasSteps) {
+    tableTitleNode.textContent = "前回の成績";
+  } else {
+    tableTitleNode.textContent = "";
+  }
+};
+
 // EXPLAIN:ポップアップを表示する際に手数や始まり、終わりの言葉、制限時間を管理する。手数か制限時間が切れる、または手数以内で目的の言葉までたどり着けば、これまで遷移したurlのデータを配列でポップアップに表示する。
 document.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -118,6 +146,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       table.innerHTML = rows;
     }
 
+    updateTableTitle(gameStatus, wordList.length > 0);
+
     if (word_start && word_end && number_of_steps) {
       document.getElementById("word_start").textContent = `start word : ${word_start}`;
       document.getElementById("word_end").textContent = `end word : ${word_end}`;
@@ -126,11 +156,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       applyDefaultGameCopy();
     }
 
-    if (gameStatus === "idle") {
-      document.getElementById("count").textContent = "Welcome to wikipedia-golf!";
-    } else {
-      document.getElementById("count").textContent = `Your Current Count : ${visitCount}`;
-    }
+    updateCountCopy(gameStatus, visitCount);
 
     toggleGameInputs(gameStatus === "inProgress");
 
@@ -158,8 +184,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       toggleGameInputs(false);
+      updateCountCopy("completed", visitCount);
+      updateTableTitle("completed", wordList.length > 0);
       await updateResultValue();
     } else if (gameStatus === "completed") {
+      updateCountCopy(gameStatus, visitCount);
+      updateTableTitle(gameStatus, wordList.length > 0);
       await updateResultValue();
     } else if (gameStatus === "idle") {
       const resultElement = document.getElementById("result_value");
@@ -311,6 +341,7 @@ document.getElementById("catch").addEventListener("click", async () => {
     if (table) {
       table.innerHTML = "";
     }
+    updateTableTitle("inProgress", false);
 
     await chrome.storage.session.remove("endTime");
     await chrome.storage.session.set({
@@ -320,7 +351,7 @@ document.getElementById("catch").addEventListener("click", async () => {
       gameStatus: "inProgress",
     });
 
-    document.getElementById("count").textContent = "Your Current Count : 0";
+    updateCountCopy("inProgress", 0);
     await updateResultValue();
 
     const randomTitles = await getRandomWikipediaTitle();
@@ -328,7 +359,8 @@ document.getElementById("catch").addEventListener("click", async () => {
       console.log("タイトルの取得に失敗しました。");
       toggleGameInputs(false);
       applyDefaultGameCopy();
-      document.getElementById("count").textContent = "Welcome to wikipedia-golf!";
+      updateCountCopy("idle", 0);
+      updateTableTitle("idle", false);
       return;
     }
 

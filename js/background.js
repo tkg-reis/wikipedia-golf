@@ -50,13 +50,19 @@ const saveURLToStorage = (newURL) => {
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   const { url } = changeInfo;
   if (tabId && url && url.startsWith(targetURL)) {
-    countTabChangeToStorage();
-    saveURLToStorage(url);
-    chrome.notifications.create({
-      type: "basic",
-      iconUrl: "../img/wikipedia-golf_ver2.png",
-      title: "ページとカウントが更新されました。",
-      message: `add ${decodeURI(url).match(/\/([^\/]+)$/)[1]}`
+    chrome.storage.session.get("gameStatus", ({ gameStatus }) => {
+      if (gameStatus !== "inProgress") {
+        return;
+      }
+
+      countTabChangeToStorage();
+      saveURLToStorage(url);
+      chrome.notifications.create({
+        type: "basic",
+        iconUrl: "../img/wikipedia-golf_ver2.png",
+        title: "ページとカウントが更新されました。",
+        message: `add ${decodeURI(url).match(/\/([^\/]+)$/)[1]}`
+      });
     });
   }
 });
