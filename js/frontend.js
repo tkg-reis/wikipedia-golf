@@ -69,6 +69,23 @@ const updateCountCopy = (gameStatus, visitCount) => {
   }
 };
 
+const updateLimitationCopy = (gameStatus, numberOfSteps) => {
+  const limitationNode = document.getElementById("number_of_steps");
+  if (!limitationNode) {
+    return;
+  }
+
+  if (numberOfSteps) {
+    if (gameStatus === "completed") {
+      limitationNode.textContent = `Your limitation Count was ${numberOfSteps}`;
+    } else {
+      limitationNode.textContent = `Your limitation Count : ${numberOfSteps}`;
+    }
+  } else {
+    limitationNode.textContent = "Your count is no set";
+  }
+};
+
 const updateTableTitle = (gameStatus, hasSteps) => {
   const tableTitleNode = document.getElementById("table-title");
   if (!tableTitleNode) {
@@ -151,7 +168,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (word_start && word_end && number_of_steps) {
       document.getElementById("word_start").textContent = `start word : ${word_start}`;
       document.getElementById("word_end").textContent = `end word : ${word_end}`;
-      document.getElementById("number_of_steps").textContent = `Your limitation Count : ${number_of_steps}`;
+      updateLimitationCopy(gameStatus, number_of_steps);
     } else {
       applyDefaultGameCopy();
     }
@@ -186,10 +203,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       toggleGameInputs(false);
       updateCountCopy("completed", visitCount);
       updateTableTitle("completed", wordList.length > 0);
+      updateLimitationCopy("completed", number_of_steps);
       await updateResultValue();
     } else if (gameStatus === "completed") {
       updateCountCopy(gameStatus, visitCount);
       updateTableTitle(gameStatus, wordList.length > 0);
+      updateLimitationCopy(gameStatus, number_of_steps);
       await updateResultValue();
     } else if (gameStatus === "idle") {
       const resultElement = document.getElementById("result_value");
@@ -378,7 +397,7 @@ document.getElementById("catch").addEventListener("click", async () => {
     document.getElementById("word_end").textContent = endWordCopy;
 
     const numberOfSteps = randomNumberFunc();
-    document.getElementById("number_of_steps").textContent = `Your limitation Count : ${numberOfSteps}`;
+    updateLimitationCopy("inProgress", numberOfSteps);
 
     await chrome.storage.session.set({
       word_start: randomTitle_start.title,
