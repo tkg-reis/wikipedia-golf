@@ -190,7 +190,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const isTimeUp = remainingTime !== null && remainingTime < 1;
 
     if (gameStatus === "inProgress" && (hasReachedStepLimit || hasReachedGoal || isTimeUp)) {
-      const checkResult = checkValue(word_end, lastVisitedWord);
+      let checkResult;
+      if (isTimeUp && !hasReachedGoal) {
+        checkResult = "No result";
+      } else {
+        checkResult = checkValue(word_end, lastVisitedWord);
+      }
       await chrome.storage.session.set({
         gameStatus: "completed",
         returnCheckVal: checkResult,
