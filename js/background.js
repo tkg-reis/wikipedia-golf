@@ -83,15 +83,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // EXPLAIN:chrome.alarms.create("timer", { delayInMinutes: 1 });のメソッドが終了した際notificationを出して、timerで定義した秒数を削除する。その後画面を一度リフレッシュさせるためにポップアップを自動で閉じる。
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "timer") {
-    chrome.notifications.create({
-      type: "basic",
-      iconUrl: "../img/wikipedia-golf_ver2.png",
-      title: "タイマー終了",
-      message: "設定した制限時間が経過しました! 拡張機能をクリックして結果を確認しましょう",
-      priority: 2
-    });
-    chrome.runtime.sendMessage({ action: "close_popup" }).catch((error) => {
-      console.log(error);
+    chrome.storage.session.get("gameStatus", ({ gameStatus }) => {
+      if (gameStatus !== "inProgress") {
+        chrome.alarms.clear("timer");
+        return;
+      }
+
+      chrome.notifications.create({
+        type: "basic",
+        iconUrl: "../img/wikipedia-golf_ver2.png",
+        title: "タイマー終了",
+        message: "設定した制限時間が経過しました! 拡張機能をクリックして結果を確認しましょう",
+        priority: 2
+      });
+      chrome.runtime.sendMessage({ action: "close_popup" }).catch((error) => {
+        console.log(error);
+      });
     });
   }
 });
