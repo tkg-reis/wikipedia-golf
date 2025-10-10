@@ -191,8 +191,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (gameStatus === "inProgress" && (hasReachedStepLimit || hasReachedGoal || isTimeUp)) {
       let checkResult;
-      if (isTimeUp && !hasReachedGoal) {
-        checkResult = "No result";
+      if (isTimeUp) {
+        checkResult = hasReachedGoal ? checkValue(word_end, lastVisitedWord) : outputImg("failure");
       } else {
         checkResult = checkValue(word_end, lastVisitedWord);
       }
@@ -233,8 +233,50 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // EXPLAIN:制限時間をポップアップに表示するための機能
+function finalizeGameOnTimeUp(data) {
+  const {
+    word_end = "",
+    wordList = [],
+    visitCount = 0,
+    number_of_steps = 0,
+  } = data;
+
+  const lastVisitedWord = wordList[wordList.length - 1];
+  const hasReachedGoal = Boolean(word_end && lastVisitedWord && word_end === lastVisitedWord);
+  const result = hasReachedGoal ? checkValue(word_end, lastVisitedWord) : outputImg("failure");
+
+  chrome.storage.session.set({
+    gameStatus: "completed",
+    returnCheckVal: result,
+  }, () => {
+    chrome.storage.session.remove("endTime", () => {
+      if (chrome.runtime.lastError) {
+        console.error("Failed to clear endTime", chrome.runtime.lastError);
+      }
+      toggleGameInputs(false);
+      updateCountCopy("completed", visitCount);
+      updateTableTitle("completed", wordList.length > 0);
+      updateLimitationCopy("completed", number_of_steps);
+      updateResultValue().catch((error) => {
+        console.error("Failed to update result value", error);
+      });
+      const remainingTimeNode = document.getElementById("remaining-time");
+      if (remainingTimeNode) {
+        remainingTimeNode.textContent = "Your time is not set";
+      }
+    });
+  });
+}
+
 function updateRemainingTime() {
-  chrome.storage.session.get(["endTime", "gameStatus"], (data) => {
+  chrome.storage.session.get([
+    "endTime",
+    "gameStatus",
+    "word_end",
+    "wordList",
+    "visitCount",
+    "number_of_steps",
+  ], (data) => {
     const remainingTimeNode = document.getElementById("remaining-time");
     if (!remainingTimeNode) {
       return;
@@ -245,15 +287,19 @@ function updateRemainingTime() {
       remainingTimeNode.textContent = `time limit : ${remainingTime} sec`;
       // MEMO:0にするとfalsyな値になるため処理が面倒になる。
       if (remainingTime < 1) {
-        chrome.storage.session.remove("endTime", () => {
-          if (chrome.runtime.lastError) {
-            console.error("Failed to clear endTime", chrome.runtime.lastError);
-            return;
-          }
-          if (data.gameStatus !== "inProgress") {
-            remainingTimeNode.textContent = "Your time is not set";
-          }
-        });
+        if (data.gameStatus === "inProgress") {
+          finalizeGameOnTimeUp(data);
+        } else {
+          chrome.storage.session.remove("endTime", () => {
+            if (chrome.runtime.lastError) {
+              console.error("Failed to clear endTime", chrome.runtime.lastError);
+              return;
+            }
+            if (data.gameStatus !== "inProgress") {
+              remainingTimeNode.textContent = "Your time is not set";
+            }
+          });
+        }
       }
     } else if (data.gameStatus !== "inProgress") {
       remainingTimeNode.textContent = "Your time is not set";
