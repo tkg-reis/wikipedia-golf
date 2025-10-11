@@ -507,6 +507,37 @@ document.getElementById("catch").addEventListener("click", async () => {
     });
 
     const timerSeconds = selectedSecondOption ? Number(selectedSecondOption) : 60;
+
+    const resetTargets = [];
+    if (selectedURLOption) {
+      resetTargets.push("selectedURLOption");
+    }
+    if (selectedSecondOption) {
+      resetTargets.push("selectedSecondOption");
+    }
+
+    if (resetTargets.length > 0) {
+      try {
+        await chrome.storage.local.remove(resetTargets);
+      } catch (error) {
+        if (chrome.runtime?.lastError) {
+          console.error("Failed to reset local game options", chrome.runtime.lastError);
+        } else {
+          console.error("Failed to reset local game options", error);
+        }
+      }
+    }
+
+    const urlInput = document.getElementById("url");
+    if (urlInput) {
+      urlInput.value = "";
+    }
+
+    const secondSelect = document.getElementById("second");
+    if (secondSelect) {
+      secondSelect.value = "60";
+    }
+
     timer(timerSeconds);
     document.getElementById("remaining-time").textContent = `time limit : ${timerSeconds} sec`;
 
